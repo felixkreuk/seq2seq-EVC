@@ -21,10 +21,10 @@ def create_hparams(hparams_string=None, verbose=False):
         ################################
         # Data Parameters              #
         ################################
-        training_list='/home/zhoukun/nonparaSeq2seqVC_code-master/pre-train/reader/emotion_list/training_mel_list.txt',
-        validation_list='/home/zhoukun/nonparaSeq2seqVC_code-master/pre-train/reader/emotion_list/evaluation_mel_list.txt',
-        #mel_mean_std='/data07/zhoukun/VCTK-Corpus/mel_mean_std.npy',
-        mel_mean_std = '/home/zhoukun/nonparaSeq2seqVC_code-master/0013/mel_mean_std.npy',
+        training_list='/data/felix/datasets/emov_preprocessed_seq2seqevc/train_filelist.txt',
+        validation_list='/data/felix/datasets/emov_preprocessed_seq2seqevc/valid_filelist.txt',
+        mel_mean_std = '/data/felix/datasets/emov_preprocessed_seq2seqevc/mel_mean_std.npy',
+
         ################################
         # Data Parameters              #
         ################################
@@ -33,7 +33,7 @@ def create_hparams(hparams_string=None, verbose=False):
         n_symbols=41, #
         pretrain_n_speakers=99, #
 
-        n_speakers=4, #
+        n_speakers=5, #
         predict_spectrogram=False,
 
         ################################

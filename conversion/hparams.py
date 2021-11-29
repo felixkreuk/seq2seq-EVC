@@ -22,50 +22,15 @@ def create_hparams(hparams_string=None, verbose=False):
         ################################
         # Data Parameters              #
         ################################
-        #training_list='/home/jxzhang/Documents/DataSets/cmu_us_slt_arctic-0.95-release/list/train_non-parallel_slt_rms.list',
-        #validation_list='/home/jxzhang/Documents/DataSets/cmu_us_slt_arctic-0.95-release/list/eval_slt_rms.list',
-        #mel_mean_std='/home/jxzhang/Documents/DataSets/VCTK/mel_mean_std.npy',
+        training_list='/data/felix/datasets/emov_preprocessed_seq2seqevc/filelist_no_disguted.txt',
+        validation_list='/data/felix/datasets/emov_preprocessed_seq2seqevc/filelist_no_disguted.txt',
+        mel_mean_std = '/data/felix/datasets/emov_preprocessed_seq2seqevc/mel_mean_std.npy',
 
-        training_list = '/home/zhoukun/nonparaSeq2seqVC_code-master/pre-train/reader/emotion_list/training_mel_list.txt',
-        validation_list = '/home/zhoukun/nonparaSeq2seqVC_code-master/pre-train/reader/emotion_list/evaluation_mel_list.txt',
-        mel_mean_std = '/data07/zhoukun/VCTK-Corpus/mel_mean_std.npy',
-
-        #training_list = '/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/reader/training_mel_list.txt',
-        #validation_list = '/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/reader/evaluation_mel_list.txt',
-        #mel_mean_std = '/data07/zhoukun/VCTK-Corpus/mel_mean_std.npy',
-
-        #speaker_A='awb',
-        #speaker_B='bdl',
-        #speaker_C='clb',
-        #speaker_D='slt',
-        #speaker_E='rms',
-
-        speaker_A='Angry',
-        speaker_B='Happy',
-        speaker_C='Sad',
-        speaker_D='Neutral',
-        #speaker_E='Surprise',
-
-
-        #a_embedding_path='zero_embeddings.npy',
-        #b_embedding_path='zero_embeddings.npy',
-        #c_embedding_path='zero_embeddings.npy',
-        #d_embedding_path='zero_embeddings.npy',
-        #e_embedding_path='zero_embeddings.npy',
-
-        #a_embedding_path='/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/outdir/embeddings/awb.npy',
-        #b_embedding_path='/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/outdir/embeddings/bdl.npy',
-        #c_embedding_path='/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/outdir/embeddings/clb.npy',
-        #d_embedding_path='/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/outdir/embeddings/rms.npy',
-        #e_embedding_path='/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/outdir/embeddings/slt.npy',
-
-        a_embedding_path='/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/outdir/embeddings/Angry.npy',
-        b_embedding_path='/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/outdir/embeddings/Happy.npy',
-        c_embedding_path='/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/outdir/embeddings/Sad.npy',
-        d_embedding_path='/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/outdir/embeddings/Neutral.npy',
-        #e_embedding_path='/home/zhoukun/nonparaSeq2seqVC_code-master/fine-tune/outdir/embeddings/Surprise.npy',
-
-
+        speaker_A='Neutral',
+        speaker_B='Amused',
+        speaker_C='Angry',
+        speaker_D='Sleepy',
+        speaker_E='Disgusted',
 
         ################################
         # Data Parameters              #
@@ -73,8 +38,8 @@ def create_hparams(hparams_string=None, verbose=False):
         n_mel_channels=80,
         n_spc_channels=1025,
         n_symbols=41, #
-        pretrain_n_speakers=4, #
-        n_speakers=4,
+        pretrain_n_speakers=5, #
+        n_speakers=5,
         predict_spectrogram=False,
 
         ################################

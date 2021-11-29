@@ -58,7 +58,7 @@ def prepare_dataloaders(hparams):
     train_sampler = DistributedSampler(trainset) \
         if hparams.distributed_run else None
 
-    train_loader = DataLoader(trainset, num_workers=1, shuffle=True,
+    train_loader = DataLoader(trainset, num_workers=16, #shuffle=True,
                               sampler=train_sampler,
                               batch_size=hparams.batch_size, pin_memory=False,
                               drop_last=True, collate_fn=collate_fn)
@@ -85,7 +85,7 @@ def load_model(hparams):
     return model
 
 
-def warm_start_model(checkpoint_path, model):
+def warm_start_model(checkpoint_path, model, n_speakers=4):
     assert os.path.isfile(checkpoint_path)
     print(("Warm starting model from checkpoint '{}'".format(checkpoint_path)))
     checkpoint_dict = torch.load(checkpoint_path, map_location='cpu')
@@ -98,11 +98,12 @@ def warm_start_model(checkpoint_path, model):
                      'speaker_classifier.projection.linear_layer.bias']:
             new_state_dict[k] = v
         else:
+            # TODO should this be empty or zeros?
             s = v.size()
             if len(s) == 2:
-                new_state_dict[k] = torch.nn.init.normal_(torch.empty((4, s[1])))
+                new_state_dict[k] = torch.nn.init.normal_(torch.empty((n_speakers, s[1])))
             else:
-                new_state_dict[k] = torch.nn.init.normal_(torch.empty(4))
+                new_state_dict[k] = torch.nn.init.normal_(torch.empty(n_speakers))
             #new_state_dict[k].weight.requires_grad = False
             #new_state_dict[k].bias.requires_grad = False
 
@@ -260,7 +261,7 @@ def train(output_directory, log_directory, checkpoint_path, warm_start, n_gpus,
     epoch_offset = 0
     if checkpoint_path is not None:
         if warm_start:
-            model = warm_start_model(checkpoint_path, model)
+            model = warm_start_model(checkpoint_path, model, hparams.n_speakers)
         else:
             model, optimizer_main, optimizer_sc, _learning_rate, iteration = load_checkpoint(
                 checkpoint_path, model, optimizer_main, optimizer_sc)

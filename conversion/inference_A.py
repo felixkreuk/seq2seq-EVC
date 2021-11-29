@@ -3,6 +3,7 @@ matplotlib.use("Agg")
 import matplotlib.pylab as plt
 
 
+from shutil import copy2 as copy
 import os
 import librosa
 import numpy as np
@@ -10,14 +11,16 @@ import torch
 import argparse
 from torch.utils.data import DataLoader
 
-from reader import TextMelIDLoader, TextMelIDCollate, id2ph, id2sp
+# from reader import TextMelIDLoader, TextMelIDCollate, id2ph, id2sp
+from reader import TextMelIDLoader, TextMelIDCollate
+from reader.symbols_emov import id2ph, id2sp
 from hparams import create_hparams
 from model import Parrot, lcm
 from train import load_model
 from inference_utils import plot_data, levenshteinDistance, recover_wav
 import scipy.io.wavfile
 
-AA_tts, BB_tts, AB_vc, BA_vc = False, True, True, False
+AA_tts, BB_tts, AB_vc, BA_vc = False, False, True, False
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-c', '--checkpoint_path', type=str,
@@ -46,20 +49,20 @@ _ = model.eval()
 # D: Neutral, A: Angry, B: Happy, C: Sad
 
 train_set_A = TextMelIDLoader(hparams.training_list, hparams.mel_mean_std,
-        hparams.speaker_A,hparams.speaker_B,
-        shuffle=False,pids=[hparams.speaker_D])
+        # hparams.speaker_A,hparams.speaker_B,
+        shuffle=False,pids=[hparams.speaker_A])
 
 train_set_B = TextMelIDLoader(hparams.training_list, hparams.mel_mean_std,
-        hparams.speaker_A,hparams.speaker_B, 
-        shuffle=False,pids=[hparams.speaker_A])
+        # hparams.speaker_A,hparams.speaker_B, 
+        shuffle=False,pids=[hparams.speaker_B])
 
 test_set_A = TextMelIDLoader(test_list, hparams.mel_mean_std, 
-        hparams.speaker_A,hparams.speaker_B,
-        shuffle=False,pids=[hparams.speaker_D])
+        # hparams.speaker_A,hparams.speaker_B,
+        shuffle=False,pids=[hparams.speaker_A])
 
 test_set_B = TextMelIDLoader(test_list, hparams.mel_mean_std, 
-        hparams.speaker_A,hparams.speaker_B,
-        shuffle=False,pids=[hparams.speaker_A])
+        # hparams.speaker_A,hparams.speaker_B,
+        shuffle=False,pids=[hparams.speaker_B])
 
 sample_list_A = test_set_A.file_path_list
 sample_list_B = test_set_B.file_path_list
@@ -109,6 +112,15 @@ def get_path(input_text, A, B):
     
     if not os.path.exists(os.path.join(path_save,'ali')):
         os.makedirs(os.path.join(path_save,'ali'))
+    
+    if not os.path.exists(os.path.join(path_save,'orig_wavs')):
+        os.makedirs(os.path.join(path_save,'orig_wavs'))
+    
+    if not os.path.exists(os.path.join(path_save,'orig_mels')):
+        os.makedirs(os.path.join(path_save,'orig_mels'))
+    
+    if not os.path.exists(os.path.join(path_save,'pwg_wavs')):
+        os.makedirs(os.path.join(path_save,'pwg_wavs'))
 
     print(path_save)
     return path_save
@@ -144,21 +156,30 @@ def generate(loader, reference_mel, beam_width, path_save, ref_sp,
 
             task = 'TTS' if input_text else 'VC'
 
+            orig_wav = sample_list[i].replace(".mel.npy", ".wav")
+            basename = os.path.basename(orig_wav)
+            copy(orig_wav, f"{path_save}/orig_wavs")
+            copy(sample_list[i], f"{path_save}/orig_mels")
+
             recover_wav(post_output, 
-                        os.path.join(path_save, 'wav_mel/Wav_%s_ref_%s_%s.wav'%(sample_id, ref_sp, task)),
+                        os.path.join(path_save, f'wav_mel/{basename}'),
+                        # os.path.join(path_save, 'wav_mel/Wav_%s_ref_%s_%s.wav'%(sample_id, ref_sp, task)),
                         hparams.mel_mean_std, 
                         ismel=ISMEL)
             
-            post_output_path = os.path.join(path_save, 'mel/Mel_%s_ref_%s_%s.npy'%(sample_id, ref_sp, task))
-            np.save(post_output_path, post_output)
+            post_output_path = os.path.join(path_save, f'mel/{basename.replace(".wav", ".npy")}')
+            # post_output_path = os.path.join(path_save, 'mel/Mel_%s_ref_%s_%s.npy'%(sample_id, ref_sp, task))
+            np.save(post_output_path, post_output.T)
                     
             #plot_data([alignments, audio_seq2seq_alignments], 
             #    os.path.join(path_save, 'ali/Ali_%s_ref_%s_%s.pdf'%(sample_id, ref_sp, task)))
             plot_data([audio_seq2seq_alignments.T, alignments], 
-                os.path.join(path_save, 'ali/Ali_%s_ref_%s_%s.pdf'%(sample_id, ref_sp, task)))  
+                os.path.join(path_save, f'ali/{basename.replace(".wav", ".pdf")}')  )
+                # os.path.join(path_save, 'ali/Ali_%s_ref_%s_%s.pdf'%(sample_id, ref_sp, task)))  
 
             plot_data([np.hstack([text_hidden, audio_seq2seq_hidden])], 
-                os.path.join(path_save, 'hid/Hid_%s_ref_%s_%s.pdf'%(sample_id, ref_sp, task)))
+                os.path.join(path_save, f'hid/{basename.replace(".wav", ".pdf")}'))
+                # os.path.join(path_save, 'hid/Hid_%s_ref_%s_%s.pdf'%(sample_id, ref_sp, task)))
             #plot_data([np.hstack([audio_seq2seq_hidden，text_hidden])], 
             #os.path.join(path_save, 'hid/Hid_%s_ref_%s_%s.pdf'%(sample_id, ref_sp, task)))
 

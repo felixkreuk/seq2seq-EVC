@@ -2,7 +2,7 @@ import torch
 import torch.utils.data
 import random
 import numpy as np
-from .symbols import ph2id, sp2id
+from .symbols_emov import ph2id, sp2id
 from torch.utils.data import DataLoader
 import os
 
@@ -34,8 +34,8 @@ class TextMelIDLoader(torch.utils.data.Dataset):
         with open(list_file) as f:
             lines = f.readlines()
             for line in lines:
-                #path, n_frame, n_phones = line.strip().split()
-                path, n_frame = line.strip().split()
+                path, n_frame, n_phones = line.strip().split()
+                # path, n_frame = line.strip().split()
                 if int(n_frame) >= 1000:
                     continue
                 file_path_list.append(path)
@@ -45,9 +45,8 @@ class TextMelIDLoader(torch.utils.data.Dataset):
             random.shuffle(file_path_list)
         
         self.file_path_list = file_path_list
-        self.mel_mean_std = np.float32(np.load(mean_std_file))
-        self.spc_mean_std = np.float32(np.load(mean_std_file.replace('mel', 'spec')))
-        self.sp2id={'Angry':0,'Happy':1,'Sad':2,'Neutral':3}
+        self.mel_mean_std = np.float32(np.load(mean_std_file, allow_pickle=True))
+        self.spc_mean_std = np.float32(np.load(mean_std_file.replace('mel_', 'spec_'), allow_pickle=True))
 
     def get_path_id_o(self, path):
         # Custom this function to obtain paths and speaker id
@@ -80,6 +79,13 @@ class TextMelIDLoader(torch.utils.data.Dataset):
 
         return mel_path, spec_path, text_path, speaker_id
 
+    def get_path_id(self, path):
+        mel_path = path
+        spec_path = path.replace(".mel", ".spec")
+        text_path = path.replace(".mel.npy", ".phones")
+        speaker_id = path.split("/")[-2]
+
+        return mel_path, spec_path, text_path, speaker_id
 
     def get_text_mel_id_pair(self, path):
         '''

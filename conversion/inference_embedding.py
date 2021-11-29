@@ -18,6 +18,8 @@ parser.add_argument('--hparams', type=str,
                         required=False, help='comma separated name=value pairs')
 args = parser.parse_args()
 
+checkpoint_dir = "/".join(args.checkpoint_path.split("/")[:-1])
+embeddings_dir = checkpoint_dir + "/embeddings"
 checkpoint_path=args.checkpoint_path
 
 hparams = create_hparams(args.hparams)
@@ -31,9 +33,7 @@ def gen_embedding(speaker):
 
     training_list = hparams.training_list
 
-    train_set_A = TextMelIDLoader(training_list, hparams.mel_mean_std, hparams.speaker_A,
-            hparams.speaker_B, 
-            shuffle=False,pids=[speaker])
+    train_set_A = TextMelIDLoader(training_list, hparams.mel_mean_std, shuffle=False, pids=[speaker])
             
     collate_fn = TextMelIDCollate(lcm(hparams.n_frames_per_step_encoder,
                             hparams.n_frames_per_step_decoder))
@@ -62,12 +62,13 @@ def gen_embedding(speaker):
         speaker_embeddings = np.vstack(speaker_embeddings)
         
     print(speaker_embeddings.shape)
-    if not os.path.exists('outdir/embeddings'):
-        os.makedirs('outdir/embeddings')
+    if not os.path.exists(embeddings_dir):
+        os.makedirs(embeddings_dir)
     
-    np.save('outdir/embeddings/%s.npy'%speaker, speaker_embeddings)
-    plot_data([speaker_embeddings], 
-        'outdir/embeddings/%s.pdf'%speaker)
+    np.save(f"{embeddings_dir}/{speaker}.npy", speaker_embeddings)
+    # np.save('outdir/embeddings/%s.npy'%speaker, speaker_embeddings)
+    plot_data([speaker_embeddings], f"{embeddings_dir}/{speaker}.pdf")
+    # plot_data([speaker_embeddings], 'outdir/embeddings/%s.pdf'%speaker)
 
 
 print('Generating embedding of %s ...'%hparams.speaker_A)
@@ -82,5 +83,5 @@ gen_embedding(hparams.speaker_C)
 print('Generating embedding of %s ...'%hparams.speaker_D)
 gen_embedding(hparams.speaker_D)
 
-# print('Generating embedding of %s ...'%hparams.speaker_E)
-# gen_embedding(hparams.speaker_E)
+print('Generating embedding of %s ...'%hparams.speaker_E)
+gen_embedding(hparams.speaker_E)

@@ -49,6 +49,7 @@ class Parrot(nn.Module):
         #         f = open(directory,'a+')
         #         f.close()
 
+        print(f"loading embeddings from {hparams.a_embedding_path}")
         a_embedding = np.load(hparams.a_embedding_path)
         a_embedding = np.mean(a_embedding, axis=0)
         
@@ -61,8 +62,8 @@ class Parrot(nn.Module):
         d_embedding = np.load(hparams.d_embedding_path)
         d_embedding = np.mean(d_embedding, axis=0)
 
-        # e_embedding = np.load(hparams.e_embedding_path)
-        # e_embedding = np.mean(e_embedding, axis=0)
+        e_embedding = np.load(hparams.e_embedding_path)
+        e_embedding = np.mean(e_embedding, axis=0)
         
         self.sp_embedding = nn.Embedding(
             hparams.n_speakers, hparams.speaker_embedding_dim)
@@ -71,7 +72,7 @@ class Parrot(nn.Module):
         self.sp_embedding.weight.data[1] =  torch.FloatTensor(b_embedding)
         self.sp_embedding.weight.data[2] =  torch.FloatTensor(c_embedding) 
         self.sp_embedding.weight.data[3] =  torch.FloatTensor(d_embedding)
-        # self.sp_embedding.weight.data[4] =  torch.FloatTensor(e_embedding) 
+        self.sp_embedding.weight.data[4] =  torch.FloatTensor(e_embedding) 
 
     def grouped_parameters(self,):
 

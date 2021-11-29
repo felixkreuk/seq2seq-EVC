@@ -1,0 +1,6 @@
+checkpoint*
+*.pyc
+*tfevents*
+*.npy
+*.pdf
+*.log
